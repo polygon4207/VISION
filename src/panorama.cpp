@@ -63,9 +63,39 @@ Matrix<float> getHomography(const vector<IntPoint2> &pts1,
         cout << "Not enough correspondences: " << n << endl;
         return Matrix<float>::Identity(3);
     }
-    Matrix<double> A(2 * n, 8);
+    Matrix<double> A(2 * n, 8); // lignes x colonnes
     Vector<double> B(2 * n);
     // ------------- TODO/A completer ----------
+    for (size_t i = 0; i < n; i++)
+    {
+        double x = pts1[i].x();
+        double y = pts1[i].y();
+
+        double u = pts2[i].x(); // x'
+        double v = pts2[i].y(); // y'
+
+        A(2 * i, 0) = x;
+        A(2 * i, 1) = y;
+        A(2 * i, 2) = 1;
+        A(2 * i, 3) = 0;
+        A(2 * i, 4) = 0;
+        A(2 * i, 5) = 0;
+        A(2 * i, 6) = -u * x;
+        A(2 * i, 7) = -u * y;
+
+        B[2 * i] = u;
+
+        A(2 * i + 1, 0) = 0;
+        A(2 * i + 1, 1) = 0;
+        A(2 * i + 1, 2) = 0;
+        A(2 * i + 1, 3) = x;
+        A(2 * i + 1, 4) = y;
+        A(2 * i + 1, 5) = 1;
+        A(2 * i + 1, 6) = -v * x;
+        A(2 * i + 1, 7) = -v * y;
+
+        B[2 * i + 1] = v;
+    }
 
     B = linSolve(A, B);
     Matrix<float> H(3, 3);
