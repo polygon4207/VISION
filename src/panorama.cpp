@@ -29,27 +29,38 @@ void getClicks(Window w1, Window w2,
         cout << "Button : " << button << endl;
 
         if (button == 3)
-            break;
+        {
+            if (pts1.size() >= 4 && pts2.size() >= 4)
+            {
+                cout << "Computing..." << endl
+                     << endl;
+                break;
+            }
+            else
+            {
+                cout << "Please select at least four points for each windows." << endl;
+                cout << "Current points window 1: " << pts1.size() << endl;
+                cout << "Current points window 2: " << pts2.size() << endl
+                     << endl;
+            }
+        }
 
-        if (win == w1 && pts1_size < 4)
+        if (win == w1)
         {
             cout << "Window 1" << endl;
             cout << "Coordinate : (" << p.x() << ", " << p.y() << ")" << endl;
             pts1.push_back(p);
-            pts1_size = pts1.size();
-            cout << pts1_size << endl;
+            cout << "Number of points selected: " << pts1.size() << endl
+                 << endl;
         }
-        else if (win == w2 && pts2_size < 4)
+        else if (win == w2)
         {
             cout << "Window 2" << endl;
             cout << "Coordinate : (" << p.x() << ", " << p.y() << ")" << endl;
             pts2.push_back(p);
-            pts2_size = pts2.size();
-            cout << pts2_size << endl;
+            cout << "Number of points selected: " << pts2.size() << endl
+                 << endl;
         }
-
-        if (pts1_size == 4 && pts2_size == 4)
-            break;
     }
 }
 
