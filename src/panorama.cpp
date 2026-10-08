@@ -71,8 +71,8 @@ Matrix<float> getHomography(const vector<IntPoint2> &pts1,
         double x_pts1 = pts1[i].x();
         double y_pts1 = pts1[i].y();
 
-        double x_pts2 = pts2[i].x_pts1(); // x'
-        double y_pts2 = pts2[i].y_pts1(); // y'
+        double x_pts2 = pts2[i].x(); // x'
+        double y_pts2 = pts2[i].y(); // y'
 
         A(2 * i, 0) = x_pts1;
         A(2 * i, 1) = y_pts1;
@@ -142,6 +142,7 @@ void panorama(const Image<Color, 2> &I1, const Image<Color, 2> &I2,
               Matrix<float> H)
 {
     Vector<float> v(3);
+    // on choisit de travailler dans le repère de I2
     float x0 = 0, y0 = 0, x1 = I2.width(), y1 = I2.height();
     for (int i = 0; i < 2; i++)
         for (int j = 0; j < 2; j++)
@@ -160,6 +161,64 @@ void panorama(const Image<Color, 2> &I1, const Image<Color, 2> &I2,
     setActiveWindow(openWindow(I.width(), I.height(), "Panorama"));
     I.fill(WHITE);
     // ------------- TODO/A completer ----------
+    Matrix<float> Hinv = inverse(H);
+
+    for (int y = 0; y < I.height(); y++)
+    {
+        for (int x = 0; x < I.width(); x++)
+        {
+            float X = x + x0;
+            float Y = y + y0;
+
+            // choisir un pixel p2 de l'image I (repère de base: I2)
+            Vector<float> p2(3);
+            p2[0] = X;
+            p2[1] = Y;
+            p2[2] = 1;
+
+            /*
+                pour obtenir le pixel p1 de I1 depuis le repère de I2
+                on applique la formule:
+                p1 = H^-1 * p2
+                ici on a directement p2, car on utilise P2 comme base de repère
+            */
+            Vector<float> p1 = Hinv * p2;
+
+            // normaliser
+            p1[0] = p1[0] / p1[2];
+            p1[1] = p1[1] / p1[2];
+            p1[2] = p1[2] / p1[2];
+
+            bool inI1 = p1[0] >= 0 && p1[0] < I1.width() &&
+                        p1[1] >= 0 && p1[1] < I1.height();
+
+            bool inI2 = X >= 0 && X < I2.width() &&
+                        Y >= 0 && Y < I2.height();
+
+            if (inI1 && inI2)
+            {
+                // couleur moyenne
+                Color c1 = I1(int(p1[0]), int(p1[1]));
+                Color c2 = I2(int(X), int(Y));
+
+                Color c(
+                    (c1.r() + c2.r()) / 2,
+                    (c1.g() + c2.g()) / 2,
+                    (c1.b() + c2.b()) / 2);
+
+                I(x, y) = c;
+            }
+            else if (inI1)
+            {
+                I(x, y) = I1(int(p1[0]), int(p1[1]));
+            }
+            else if (inI2)
+            {
+                I(x, y) = I2(int(X), int(Y));
+            }
+        }
+    }
+
     display(I, 0, 0);
 }
 
