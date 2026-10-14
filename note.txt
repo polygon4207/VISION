@@ -1,0 +1,9 @@
+Pour compiler:
+
+cd build
+cmake .. -DQt6_DIR=/Users/[USER]/Qt/6.12.0/macos/lib/cmake/Qt6
+
+Remplacer [USER] par le chemin approprié.
+
+cmake ..
+make
