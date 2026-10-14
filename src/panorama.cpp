@@ -94,8 +94,6 @@ Matrix<float> getHomography(const vector<IntPoint2> &pts1,
         A(2 * i, 6) = -x_pts2 * x_pts1;
         A(2 * i, 7) = -x_pts2 * y_pts1;
 
-        B[2 * i] = x_pts2;
-
         A(2 * i + 1, 0) = 0;
         A(2 * i + 1, 1) = 0;
         A(2 * i + 1, 2) = 0;
@@ -105,6 +103,7 @@ Matrix<float> getHomography(const vector<IntPoint2> &pts1,
         A(2 * i + 1, 6) = -y_pts2 * x_pts1;
         A(2 * i + 1, 7) = -y_pts2 * y_pts1;
 
+        B[2 * i] = x_pts2;
         B[2 * i + 1] = y_pts2;
     }
 
@@ -172,7 +171,7 @@ void panorama(const Image<Color, 2> &I1, const Image<Color, 2> &I2,
     setActiveWindow(openWindow(I.width(), I.height(), "Panorama"));
     I.fill(WHITE);
     // ------------- TODO/A completer ----------
-    Matrix<float> Hinv = inverse(H);
+    Matrix<float> h_inv = inverse(H);
 
     for (int y = 0; y < I.height(); y++)
     {
@@ -193,7 +192,7 @@ void panorama(const Image<Color, 2> &I1, const Image<Color, 2> &I2,
                 p1 = H^-1 * p2
                 ici on a directement p2, car on utilise P2 comme base de repère
             */
-            Vector<float> p1 = Hinv * p2;
+            Vector<float> p1 = h_inv * p2;
 
             // normaliser
             p1[0] = p1[0] / p1[2];
@@ -236,8 +235,8 @@ void panorama(const Image<Color, 2> &I1, const Image<Color, 2> &I2,
 // Main function
 int main(int argc, char *argv[])
 {
-    string s1 = argc > 2 ? argv[1] : srcPath("data/image0006.jpg");
-    string s2 = argc > 2 ? argv[2] : srcPath("data/image0007.jpg");
+    string s1 = argc > 2 ? argv[1] : srcPath("image0006.jpg");
+    string s2 = argc > 2 ? argv[2] : srcPath("image0007.jpg");
 
     // Load and display images
     Image<Color> I1, I2;
