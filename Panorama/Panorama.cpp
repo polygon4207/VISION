@@ -102,7 +102,7 @@ Matrix<float> getHomography(const vector<IntPoint2> &pts1,
         A(2 * i + 1, 5) = 1;
         A(2 * i + 1, 6) = -y_pts2 * x_pts1;
         A(2 * i + 1, 7) = -y_pts2 * y_pts1;
-
+        
         B[2 * i] = x_pts2;
         B[2 * i + 1] = y_pts2;
     }
