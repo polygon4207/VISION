@@ -245,49 +245,68 @@ void displayEpipolar(Image<Color> I1, Image<Color> I2,
         if (getMouse(x, y) == 3)
             break;
 
-        // clic dans l'image de gauche
+        Color c(rand() % 256, rand() % 256, rand() % 256);
+        fillCircle(x, y, 2, c);
+
+        float p_util[3][1] = {{(float)x}, {(float)y}, {1}};
+        FMatrix<float, 3, 1> p(p_util);
+
+        FMatrix<float, 3, 1> l;
+        int decalage = 0;
+
         if (x < w)
         {
-            // afficher le point cliqué
-            fillCircle(x, y, 3, RED);
-
-            // droite dans l'image de droite : l = F^T * x
-            float a = F(0, 0) * x + F(1, 0) * y + F(2, 0);
-            float b = F(0, 1) * x + F(1, 1) * y + F(2, 1);
-            float c = F(0, 2) * x + F(1, 2) * y + F(2, 2);
-
-            // équation de la droite : a X + b Y + c = 0
-            // on calcule Y pour X = 0 et X = w-1
-            if (b != 0)
-            {
-                int y1 = int(-c / b);
-                int y2 = int(-(a * (w - 1) + c) / b);
-
-                drawLine(w, y1, 2 * w - 1, y2, GREEN);
-            }
+            l = transpose(F) * p;
+            decalage = w;
         }
-        // clic dans l'image de droite
         else
         {
-            // coordonnée locale dans l'image 2
-            int xp = x - w;
+            p(0, 0) -= w;
+            l = F * p;
+        }
 
-            // afficher le point cliqué
-            fillCircle(x, y, 3, RED);
+        float a = l(0, 0);
+        float b = l(1, 0);
+        float cc = l(2, 0);
 
-            // droite dans l'image de gauche : l = F * x'
-            float a = F(0, 0) * xp + F(0, 1) * y + F(0, 2);
-            float b = F(1, 0) * xp + F(1, 1) * y + F(1, 2);
-            float c = F(2, 0) * xp + F(2, 1) * y + F(2, 2);
+        vector<float> pts;
 
-            if (b != 0)
+        if (b != 0)
+        {
+            float y1 = -cc / b;
+            if (y1 >= 0 && y1 <= h)
             {
-                int y1 = int(-c / b);
-                int y2 = int(-(a * (w - 1) + c) / b);
+                pts.push_back(decalage);
+                pts.push_back(y1);
+            }
 
-                drawLine(0, y1, w - 1, y2, GREEN);
+            float y2 = (-cc - a * w) / b;
+            if (y2 >= 0 && y2 <= h)
+            {
+                pts.push_back(w + decalage);
+                pts.push_back(y2);
             }
         }
+
+        if (a != 0)
+        {
+            float x1 = -cc / a;
+            if (x1 >= 0 && x1 <= w)
+            {
+                pts.push_back(x1 + decalage);
+                pts.push_back(0);
+            }
+
+            float x2 = (-cc - b * h) / a;
+            if (x2 >= 0 && x2 <= w)
+            {
+                pts.push_back(x2 + decalage);
+                pts.push_back(h);
+            }
+        }
+
+        if (pts.size() >= 4)
+            drawLine(pts[0], pts[1], pts[2], pts[3], c);
     }
 }
 
